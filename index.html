@@ -317,6 +317,22 @@
     .learn-emoji { font-size: 58px; }
     .learn-card h3 { font-size: 26px; letter-spacing: -0.03em; }
     .learn-card p { color: var(--muted); line-height: 1.5; margin-top: 8px; }
+    .profile-section { margin-top: 16px; padding: 14px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(135deg, rgba(36,122,86,.08), rgba(247,183,51,.08)); }
+    .profile-section h4 { margin: 0 0 10px; font-size: 15px; text-transform: uppercase; letter-spacing: .08em; color: var(--primary); }
+    .cool-list { margin: 0; padding-left: 20px; color: var(--muted); line-height: 1.55; }
+    .cool-list li { margin: 5px 0; }
+    .profile-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+    .mini-card { border: 1px solid var(--line); border-radius: 16px; padding: 12px; background: var(--card); box-shadow: var(--soft-shadow); }
+    .mini-card b { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 5px; }
+    .mini-card span { font-weight: 850; }
+    .quiz-box { margin-top: 16px; border: 2px dashed rgba(36,122,86,.32); border-radius: 18px; padding: 14px; background: rgba(255,255,255,.45); }
+    [data-theme="dark"] .quiz-box { background: rgba(255,255,255,.04); }
+    .quiz-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 10px; }
+    .quiz-options button { min-height: 42px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); color: var(--text); font-weight: 850; cursor: pointer; }
+    .quiz-options button.correct { background: rgba(36,122,86,.16); border-color: var(--primary); }
+    .quiz-options button.wrong { background: rgba(210,75,75,.12); border-color: var(--danger); }
+    .quiz-feedback { min-height: 22px; margin-top: 8px; font-weight: 850; color: var(--primary); }
+    @media (max-width: 560px) { .profile-grid, .quiz-options { grid-template-columns: 1fr; } }
     .fact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
     .fact { padding: 11px; border-radius: 16px; border: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
     .fact b { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
@@ -481,6 +497,22 @@
               <div class="fact"><b>Habitat</b><span id="factHabitat"></span></div>
               <div class="fact"><b>Diet</b><span id="factDiet"></span></div>
             </div>
+            <div class="profile-section">
+              <h4>Cool Field Notes</h4>
+              <ul class="cool-list" id="coolFacts"></ul>
+            </div>
+            <div class="profile-grid">
+              <div class="mini-card"><b>Animal Superpower</b><span id="superpower"></span></div>
+              <div class="mini-card"><b>Detective Detail</b><span id="detectiveDetail"></span></div>
+              <div class="mini-card"><b>Compare It</b><span id="compareFact"></span></div>
+              <div class="mini-card"><b>Memory Hook</b><span id="memoryHook"></span></div>
+            </div>
+            <div class="quiz-box" id="quizBox">
+              <strong>Quick Check</strong>
+              <p id="quizQuestion"></p>
+              <div class="quiz-options" id="quizOptions"></div>
+              <div class="quiz-feedback" id="quizFeedback"></div>
+            </div>
             <p id="funFact" style="font-weight:800; color:var(--text);"></p>
             <div class="hero-actions" style="margin-top:16px;">
               <button class="primary-btn" id="nextRoundBtn">Next Case</button>
@@ -500,7 +532,7 @@
     { id: "classic", name: "Classic", note: "balanced", clues: 5, choices: 4, timer: 0 },
     { id: "junior", name: "Junior", note: "easier", clues: 6, choices: 3, timer: 0 },
     { id: "speed", name: "Speed", note: "90 sec", clues: 4, choices: 4, timer: 90 },
-    { id: "expert", name: "Expert", note: "harder", clues: 3, choices: 6, timer: 0 }
+    { id: "expert", name: "Expert", note: "hard clues", clues: 4, choices: 6, timer: 0 }
   ];
 
   const CATEGORIES = ["All", "Backyard", "Farm", "Forest", "Ocean", "Desert", "Arctic", "Jungle", "Grassland", "Wetlands", "Pets"];
@@ -574,7 +606,7 @@
     scoreStat: $("scoreStat"), streakStat: $("streakStat"), bestStat: $("bestStat"), seenStat: $("seenStat"), rankLabel: $("rankLabel"),
     modeLabel: $("modeLabel"), catLabel: $("catLabel"), clueCountLabel: $("clueCountLabel"), clueList: $("clueList"),
     answerGrid: $("answerGrid"), mysteryEmoji: $("mysteryEmoji"), learnCard: $("learnCard"), learnEmoji: $("learnEmoji"), learnTitle: $("learnTitle"),
-    learnText: $("learnText"), factClass: $("factClass"), factHabitat: $("factHabitat"), factDiet: $("factDiet"), funFact: $("funFact"), resultLabel: $("resultLabel"),
+    learnText: $("learnText"), factClass: $("factClass"), factHabitat: $("factHabitat"), factDiet: $("factDiet"), funFact: $("funFact"), coolFacts: $("coolFacts"), superpower: $("superpower"), detectiveDetail: $("detectiveDetail"), compareFact: $("compareFact"), memoryHook: $("memoryHook"), quizQuestion: $("quizQuestion"), quizOptions: $("quizOptions"), quizFeedback: $("quizFeedback"), resultLabel: $("resultLabel"),
     nextClueBtn: $("nextClueBtn"), fiftyBtn: $("fiftyBtn"), nextRoundBtn: $("nextRoundBtn"), skipBtn: $("skipBtn"), homeBtn: $("homeBtn"),
     modalOverlay: $("modalOverlay"), modalBody: $("modalBody"), modalTitle: $("modalTitle"), modalClose: $("modalClose"), resetBtn: $("resetBtn"), explainBtn: $("explainBtn"),
     timerBar: $("timerBar"), timerFill: $("timerFill")
@@ -675,11 +707,44 @@
     const map = new Map(); arr.forEach(a => map.set(a.name, a)); return [...map.values()];
   }
 
+
+  function getCluesForCurrent() {
+    if (!state.current) return [];
+    if (state.mode !== "expert") return state.current.clues;
+    return buildExpertClues(state.current);
+  }
+
+  function buildExpertClues(a) {
+    const pool = [];
+    const cls = (a.class || "animal").toLowerCase();
+    pool.push(`I am ${article(a.class)} ${cls}, but my first clues avoid my obvious appearance.`);
+    if (/meat|fish|squid|seal|insect|small animals|eggs|scraps/i.test(a.diet)) {
+      pool.push("My diet gives detectives an important clue about where I fit in the food web.");
+    } else {
+      pool.push("I am mostly a plant-eater, so my body and behavior help me find or process plant food.");
+    }
+    if (/ocean|sea|coast|river|lake|wetland|pond|water/i.test(a.habitat)) pool.push("Water shapes much of my life, even when I do not spend every moment in it.");
+    else if (/forest|jungle|tree/i.test(a.habitat)) pool.push("Cover, trees, or dense plants are important parts of my world.");
+    else if (/grassland|savanna|desert|arctic/i.test(a.habitat)) pool.push("Wide open spaces or extreme conditions help narrow down my identity.");
+    else pool.push("My habitat overlaps with places people may know well, but that alone will not solve the case.");
+    if (a.why) pool.push(a.why.replace(/^The clues point to /i, "A careful detective notices ").replace(/^A /, "One sign is a "));
+    pool.push(a.clues[Math.min(a.clues.length - 1, 2)] || a.fact);
+    pool.push(a.clues[a.clues.length - 1] || a.name);
+    return uniqueStrings(pool).slice(0, 6);
+  }
+
+  function uniqueStrings(arr) {
+    const out = [];
+    arr.forEach(x => { if (x && !out.includes(x)) out.push(x); });
+    return out;
+  }
+
   function renderCase() {
     const mode = MODES.find(m => m.id === state.mode);
-    const maxClues = Math.min(mode.clues, state.current.clues.length);
+    const clueSource = getCluesForCurrent();
+    const maxClues = Math.min(mode.clues, clueSource.length);
     els.clueCountLabel.textContent = `${state.revealed}/${maxClues}`;
-    const clues = state.current.clues.slice(0, maxClues);
+    const clues = clueSource.slice(0, maxClues);
     els.clueList.innerHTML = clues.map((c, i) => i < state.revealed ? `<div class="clue">${i+1}. ${escapeHtml(c)}</div>` : `<div class="clue locked">${i+1}. Clue locked</div>`).join("");
     els.answerGrid.innerHTML = state.choices.map(a => `<button class="choice-btn" data-answer="${escapeHtml(a.name)}"><span><span class="name">${escapeHtml(a.name)}</span><br><span class="type">${escapeHtml(a.class)}</span></span><span>›</span></button>`).join("");
     els.nextClueBtn.textContent = state.revealed >= maxClues ? "No More Clues" : "Reveal Another Clue";
@@ -689,7 +754,7 @@
   function revealClue() {
     if (state.locked) return;
     const mode = MODES.find(m => m.id === state.mode);
-    const maxClues = Math.min(mode.clues, state.current.clues.length);
+    const maxClues = Math.min(mode.clues, getCluesForCurrent().length);
     if (state.revealed < maxClues) {
       state.revealed++;
       blip(470, .04);
@@ -729,18 +794,132 @@
 
   function revealLearning(correct) {
     const a = state.current;
+    const profile = buildProfile(a);
     els.mysteryEmoji.textContent = a.emoji;
     els.mysteryEmoji.classList.add("revealed");
     els.learnEmoji.textContent = a.emoji;
     els.learnTitle.textContent = a.name;
     els.resultLabel.textContent = correct ? "Case Closed" : "Solved Together";
-    els.learnText.textContent = `${a.name}s are ${article(a.class)} ${a.class.toLowerCase()} found in ${a.habitat.toLowerCase()}. They usually eat ${a.diet.toLowerCase()}.`;
+    els.learnText.textContent = profile.summary;
     els.factClass.textContent = a.class;
     els.factHabitat.textContent = a.habitat;
     els.factDiet.textContent = a.diet;
     els.funFact.textContent = `Detective Fact: ${a.fact}`;
+    els.coolFacts.innerHTML = profile.coolFacts.map(f => `<li>${escapeHtml(f)}</li>`).join("");
+    els.superpower.textContent = profile.superpower;
+    els.detectiveDetail.textContent = profile.detail;
+    els.compareFact.textContent = profile.compare;
+    els.memoryHook.textContent = profile.hook;
+    renderMiniQuiz(a, profile);
     els.learnCard.classList.add("active");
     els.learnCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function buildProfile(a) {
+    const lowerHabitat = a.habitat.toLowerCase();
+    const lowerDiet = a.diet.toLowerCase();
+    const summary = `${a.name}s are ${article(a.class)} ${a.class.toLowerCase()} found in ${lowerHabitat}. They usually eat ${lowerDiet}. The important lesson is not just the name of the animal, but how its body, food, and habitat work together.`;
+    const coolFacts = uniqueStrings([
+      a.fact,
+      `Habitat clue: ${a.habitat} tells you what kind of weather, shelter, and food this animal is built for.`,
+      `Food-web clue: eating ${lowerDiet} makes this animal part of a larger chain of plants, prey, predators, and scavengers.`,
+      classFact(a.class),
+      categoryFact(a),
+      `Best detective clue: ${a.clues[a.clues.length - 1]}`
+    ]).slice(0, 6);
+    return {
+      summary,
+      coolFacts,
+      superpower: superpowerFor(a),
+      detail: detectiveDetailFor(a),
+      compare: compareFor(a),
+      hook: memoryHookFor(a)
+    };
+  }
+
+  function classFact(cls) {
+    const facts = {
+      Mammal: "Mammals usually have hair or fur, breathe air, and feed milk to their babies.",
+      Bird: "Birds have feathers, beaks, and lightweight bodies; not every bird can fly.",
+      Reptile: "Reptiles are cold-blooded animals with scales or shells, and many lay eggs.",
+      Fish: "Fish live in water, breathe with gills, and use fins to move.",
+      Amphibian: "Amphibians often begin life in water and later live partly on land.",
+      Insect: "Insects have six legs, three main body parts, and often play huge roles in ecosystems.",
+      Arachnid: "Arachnids have eight legs and include spiders, scorpions, ticks, and mites."
+    };
+    return facts[cls] || "Every animal has adaptations that help it survive in its own environment.";
+  }
+
+  function categoryFact(a) {
+    const c = a.cat || [];
+    if (c.includes("Ocean")) return "Ocean animals often depend on currents, camouflage, pressure, or swimming efficiency.";
+    if (c.includes("Arctic")) return "Arctic animals must solve the problem of staying warm and finding food in extreme cold.";
+    if (c.includes("Desert")) return "Desert animals survive by saving water, avoiding heat, or being active at cooler times.";
+    if (c.includes("Jungle")) return "Jungle animals often use climbing, camouflage, sound, or sharp senses in dense habitats.";
+    if (c.includes("Grassland")) return "Grassland animals often rely on speed, herds, eyesight, or hiding in open spaces.";
+    if (c.includes("Wetlands")) return "Wetlands are rich habitats where land and water animals often overlap.";
+    if (c.includes("Backyard")) return "Backyard animals are a reminder that wildlife can live surprisingly close to people.";
+    if (c.includes("Farm")) return "Farm animals are often domesticated, meaning people have shaped their behavior over many generations.";
+    return "A habitat is more than a place; it is the animal's food, shelter, weather, and danger zone.";
+  }
+
+  function superpowerFor(a) {
+    const text = `${a.name} ${a.fact}`.toLowerCase();
+    if (/echolocation|click/.test(text)) return "Natural sonar: it can use sound to understand the world around it.";
+    if (/magnetic/.test(text)) return "Hidden navigation: it may use invisible natural signals to aim or travel.";
+    if (/swim|ocean|water|fish/.test(text + a.habitat.toLowerCase())) return "Water mastery: its body or behavior helps it move, hunt, or survive around water.";
+    if (/fly|bird|feather|wing/.test(text + a.class.toLowerCase())) return "Air advantage: feathers, eyesight, or lightweight design help it survive from above.";
+    if (/venom|poison|sting/.test(text)) return "Chemical defense: it can use venom or toxins to protect itself or catch prey.";
+    if (/camouflage|stripe|blend|hide/.test(text + a.why.toLowerCase())) return "Camouflage: its body helps it disappear into the background or confuse danger.";
+    if (/fast|speed|gallop|run/.test(text + a.why.toLowerCase())) return "Speed and reaction: quick movement helps it escape, chase, or survive.";
+    return "Adaptation: its body and behavior fit its habitat like specialized tools.";
+  }
+
+  function detectiveDetailFor(a) {
+    if (/mammal/i.test(a.class)) return "Look for clues about fur, live young, milk, breathing air, and warm-blooded behavior.";
+    if (/bird/i.test(a.class)) return "Look for feathers, beaks, eggs, flight or swimming adaptations, and sharp senses.";
+    if (/reptile/i.test(a.class)) return "Look for scales, shells, sunning behavior, eggs, and cold-blooded survival strategies.";
+    if (/fish/i.test(a.class)) return "Look for gills, fins, water habitat, schooling behavior, and body shape.";
+    if (/amphibian/i.test(a.class)) return "Look for moist skin, water-to-land life stages, and sensitivity to habitat changes.";
+    if (/insect/i.test(a.class)) return "Look for six legs, antennae, wings, body segments, and ecosystem jobs.";
+    return "The strongest clue usually connects body shape, food, and habitat.";
+  }
+
+  function compareFor(a) {
+    if (/Elephant/i.test(a.name)) return "An elephant is heavier than any other living land animal.";
+    if (/Giraffe/i.test(a.name)) return "A giraffe is taller than every other living land animal.";
+    if (/Dolphin|Whale|Shark|Turtle|Penguin/i.test(a.name)) return "Unlike many ocean animals, classification depends on body traits, not just where it lives.";
+    if (/Tiger|Lion|Cheetah|Leopard/i.test(a.name)) return "Big cats may look similar, but social behavior, markings, and hunting style separate them.";
+    if (/Horse|Zebra|Donkey/i.test(a.name)) return "Members of the horse family can look different but share hooves, grazing habits, and similar body plans.";
+    return `Compare ${a.name}s with other ${a.class.toLowerCase()}s by asking: where does it live, what does it eat, and what body tool makes it special?`;
+  }
+
+  function memoryHookFor(a) {
+    const finalClue = a.clues[a.clues.length - 1] || a.fact;
+    return `Remember: ${finalClue}`;
+  }
+
+  function renderMiniQuiz(a, profile) {
+    const correct = a.class;
+    const classes = uniqueStrings(ANIMALS.map(x => x.class).filter(x => x !== correct));
+    const opts = shuffle([correct, ...sample(classes, 3)]).slice(0, 4);
+    els.quizQuestion.textContent = `Quick check: What kind of animal is a ${a.name}?`;
+    els.quizFeedback.textContent = "";
+    els.quizOptions.innerHTML = opts.map(o => `<button data-quiz="${escapeHtml(o)}">${escapeHtml(o)}</button>`).join("");
+    els.quizOptions.querySelectorAll("button").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = btn.dataset.quiz;
+        els.quizOptions.querySelectorAll("button").forEach(b => { b.disabled = true; if (b.dataset.quiz === correct) b.classList.add("correct"); });
+        if (val === correct) {
+          els.quizFeedback.textContent = "Correct. That classification is one of the best ways to think like a zoologist.";
+          blip(820, .04);
+        } else {
+          btn.classList.add("wrong");
+          els.quizFeedback.textContent = `Good try. ${a.name}s are ${article(correct)} ${correct.toLowerCase()}.`;
+          buzz();
+        }
+      });
+    });
   }
 
   function fifty() {
@@ -794,7 +973,7 @@
         <li><strong>Classic:</strong> four choices and balanced clues.</li>
         <li><strong>Junior:</strong> fewer choices and more clues.</li>
         <li><strong>Speed:</strong> a timed challenge.</li>
-        <li><strong>Expert:</strong> more choices and fewer clues.</li>
+        <li><strong>Expert:</strong> more choices, fewer giveaways, and clues that start with science before appearance.</li>
       </ul>
       <p style="margin-top:12px;">Use <strong>Reveal Another Clue</strong> when stuck. Use <strong>50/50</strong> to remove wrong answers, but it costs 5 points. After every case, the game explains the animal so learning stays built in.</p>`;
     els.modalOverlay.classList.add("active");
@@ -802,7 +981,8 @@
 
   function showWhy() {
     els.modalTitle.textContent = `Why ${state.current.name}?`;
-    els.modalBody.innerHTML = `<p>${escapeHtml(state.current.why)}</p><p style="margin-top:12px;"><strong>Best clue:</strong> ${escapeHtml(state.current.clues[state.current.clues.length - 1])}</p>`;
+    const clueSet = getCluesForCurrent();
+    els.modalBody.innerHTML = `<p>${escapeHtml(state.current.why)}</p><p style="margin-top:12px;"><strong>Best clue:</strong> ${escapeHtml(clueSet[clueSet.length - 1] || state.current.fact)}</p>`;
     els.modalOverlay.classList.add("active");
   }
 
