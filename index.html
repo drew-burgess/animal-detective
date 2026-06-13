@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Animal Detective</title>
+  <style>
+    :root {
+      --bg: #f4f7f2;
+      --bg2: #fff7e7;
+      --card: #ffffff;
+      --text: #1f2a24;
+      --muted: #5f6e65;
+      --line: #dce6dd;
+      --primary: #247a56;
+      --primary2: #35a06f;
+      --accent: #f7b733;
+      --accent2: #ef6f4f;
+      --sky: #4aa3df;
+      --danger: #d24b4b;
+      --good: #247a56;
+      --shadow: 0 18px 50px rgba(31, 42, 36, 0.12);
+      --soft-shadow: 0 8px 22px rgba(31, 42, 36, 0.10);
+      --radius: 24px;
+      --tap: 48px;
+    }
+
+    [data-theme="dark"] {
+      --bg: #101816;
+      --bg2: #19231e;
+      --card: #17211d;
+      --text: #eef7f1;
+      --muted: #b5c5bb;
+      --line: #304039;
+      --primary: #43c28b;
+      --primary2: #78d7ab;
+      --accent: #f5bd4b;
+      --accent2: #ff8a66;
+      --sky: #75bdf0;
+      --danger: #ff7d7d;
+      --good: #65d79d;
+      --shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+      --soft-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: ui-rounded, "SF Pro Rounded", "Nunito", "Avenir Next", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(247, 183, 51, 0.22), transparent 32%),
+        radial-gradient(circle at 88% 12%, rgba(74, 163, 223, 0.20), transparent 30%),
+        linear-gradient(135deg, var(--bg), var(--bg2));
+      min-height: 100%;
+      overflow-x: hidden;
+    }
+
+    button, input, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 0 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, var(--primary), var(--primary2));
+      color: white;
+      font-size: 30px;
+      box-shadow: var(--soft-shadow);
+      flex: 0 0 auto;
+    }
+
+    h1, h2, h3, p { margin: 0; }
+    h1 { font-size: clamp(28px, 4vw, 46px); letter-spacing: -0.04em; line-height: 0.95; }
+    .tagline { color: var(--muted); font-size: 14px; margin-top: 5px; }
+
+    .top-actions { display: flex; gap: 10px; align-items: center; }
+
+    .icon-btn, .pill-btn, .choice-btn, .primary-btn, .secondary-btn, .tiny-btn {
+      border: 0;
+      cursor: pointer;
+      min-height: var(--tap);
+      border-radius: 999px;
+      font-weight: 800;
+      color: var(--text);
+      transition: transform 0.12s ease, filter 0.12s ease, background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .icon-btn:active, .pill-btn:active, .choice-btn:active, .primary-btn:active, .secondary-btn:active, .tiny-btn:active { transform: scale(0.98); }
+    .icon-btn:focus-visible, .pill-btn:focus-visible, .choice-btn:focus-visible, .primary-btn:focus-visible, .secondary-btn:focus-visible, .tiny-btn:focus-visible { outline: 4px solid rgba(247, 183, 51, .45); outline-offset: 2px; }
+
+    .icon-btn {
+      width: 50px;
+      background: var(--card);
+      box-shadow: var(--soft-shadow);
+      border: 1px solid var(--line);
+      font-size: 22px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 330px 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel, .game-card, .modal-card {
+      background: rgba(255,255,255,0.78);
+      background: color-mix(in srgb, var(--card) 88%, transparent);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .panel { padding: 18px; position: sticky; top: 14px; }
+    .panel-section + .panel-section { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 16px; }
+    .label { font-size: 12px; font-weight: 900; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .stat {
+      padding: 12px;
+      border-radius: 18px;
+      background: color-mix(in srgb, var(--primary) 8%, var(--card));
+      border: 1px solid var(--line);
+    }
+    .stat strong { display: block; font-size: 25px; letter-spacing: -0.04em; }
+    .stat span { color: var(--muted); font-size: 12px; font-weight: 800; }
+
+    .mode-grid, .cat-grid { display: grid; gap: 9px; }
+    .mode-grid { grid-template-columns: 1fr; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+
+    .pill-btn {
+      padding: 11px 14px;
+      border: 1px solid var(--line);
+      background: var(--card);
+      box-shadow: none;
+      text-align: left;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .pill-btn.active {
+      background: linear-gradient(145deg, var(--primary), var(--primary2));
+      color: white;
+      border-color: transparent;
+    }
+    .pill-btn small { opacity: .75; font-weight: 900; }
+
+    .game-card { min-height: 690px; overflow: hidden; position: relative; }
+
+    .hero {
+      padding: clamp(20px, 4vw, 38px);
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 24px;
+      align-items: center;
+      min-height: 690px;
+    }
+
+    .hero h2 { font-size: clamp(38px, 7vw, 76px); letter-spacing: -0.07em; line-height: .9; margin-bottom: 16px; }
+    .hero p { color: var(--muted); font-size: 18px; line-height: 1.45; max-width: 620px; }
+
+    .mascot-wrap { display: grid; place-items: center; }
+    .mascot {
+      width: min(320px, 75vw);
+      aspect-ratio: 1;
+      border-radius: 45% 55% 48% 52%;
+      background:
+        radial-gradient(circle at 50% 36%, #fff 0 10%, transparent 11%),
+        radial-gradient(circle at 40% 44%, #1f2a24 0 2.8%, transparent 3%),
+        radial-gradient(circle at 60% 44%, #1f2a24 0 2.8%, transparent 3%),
+        radial-gradient(circle at 50% 58%, #1f2a24 0 3%, transparent 3.2%),
+        linear-gradient(145deg, var(--accent), var(--accent2));
+      position: relative;
+      box-shadow: var(--shadow);
+      animation: floaty 4.2s ease-in-out infinite;
+    }
+    .mascot:before, .mascot:after {
+      content: "";
+      position: absolute;
+      width: 34%; height: 34%;
+      top: -5%;
+      border-radius: 50%;
+      background: inherit;
+      z-index: -1;
+    }
+    .mascot:before { left: 6%; }
+    .mascot:after { right: 6%; }
+    .lens {
+      position: absolute;
+      width: 34%; height: 34%;
+      right: -5%; bottom: 10%;
+      border: 12px solid color-mix(in srgb, var(--sky) 75%, white);
+      border-radius: 50%;
+      background: rgba(255,255,255,.24);
+      transform: rotate(-14deg);
+    }
+    .lens:after {
+      content: "";
+      position: absolute;
+      width: 70%; height: 12px;
+      background: color-mix(in srgb, var(--sky) 75%, white);
+      border-radius: 999px;
+      right: -54%; bottom: -25%;
+      transform: rotate(42deg);
+    }
+
+    @keyframes floaty { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    .primary-btn, .secondary-btn { padding: 14px 20px; }
+    .primary-btn { background: linear-gradient(145deg, var(--primary), var(--primary2)); color: white; box-shadow: var(--soft-shadow); }
+    .secondary-btn { background: var(--card); border: 1px solid var(--line); }
+
+    .game-view { display: none; padding: clamp(14px, 3vw, 28px); }
+    .game-view.active { display: block; }
+    .hud { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 8px 11px; border-radius: 999px; background: var(--card); border: 1px solid var(--line); color: var(--muted); font-weight: 900; font-size: 12px; }
+    .chip strong { color: var(--text); }
+
+    .mystery-zone {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .clue-card, .answers-card, .learn-card {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--card) 92%, transparent);
+      border-radius: 24px;
+      padding: 18px;
+      box-shadow: var(--soft-shadow);
+    }
+
+    .animal-emoji {
+      font-size: clamp(62px, 13vw, 116px);
+      width: 150px;
+      height: 150px;
+      border-radius: 36px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(145deg, color-mix(in srgb, var(--accent) 28%, var(--card)), color-mix(in srgb, var(--sky) 15%, var(--card)));
+      border: 1px solid var(--line);
+      margin-bottom: 14px;
+      filter: grayscale(1) contrast(.2) brightness(.82);
+      user-select: none;
+    }
+    .animal-emoji.revealed { filter: none; animation: popBig .45s ease; }
+    @keyframes popBig { 0% { transform: scale(.72); } 60% { transform: scale(1.08); } 100% { transform: scale(1); } }
+
+    .clue-list { display: grid; gap: 10px; margin-top: 14px; }
+    .clue {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: color-mix(in srgb, var(--primary) 7%, var(--card));
+      border: 1px solid var(--line);
+      color: var(--text);
+      line-height: 1.35;
+      font-weight: 750;
+    }
+    .clue.locked { color: var(--muted); background: transparent; border-style: dashed; font-weight: 800; }
+
+    .answer-grid { display: grid; gap: 10px; margin-top: 12px; }
+    .choice-btn {
+      width: 100%;
+      padding: 14px 15px;
+      border-radius: 18px;
+      border: 2px solid var(--line);
+      background: var(--card);
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 62px;
+    }
+    .choice-btn .name { font-size: 18px; }
+    .choice-btn .type { color: var(--muted); font-size: 12px; font-weight: 900; }
+    .choice-btn.correct { background: color-mix(in srgb, var(--good) 18%, var(--card)); border-color: var(--good); }
+    .choice-btn.wrong { background: color-mix(in srgb, var(--danger) 15%, var(--card)); border-color: var(--danger); }
+    .choice-btn:disabled { cursor: default; opacity: 1; }
+
+    .learn-card { display: none; margin-top: 16px; }
+    .learn-card.active { display: block; }
+    .learn-head { display: flex; gap: 14px; align-items: center; margin-bottom: 12px; }
+    .learn-emoji { font-size: 58px; }
+    .learn-card h3 { font-size: 26px; letter-spacing: -0.03em; }
+    .learn-card p { color: var(--muted); line-height: 1.5; margin-top: 8px; }
+    .fact-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+    .fact { padding: 11px; border-radius: 16px; border: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 10%, var(--card)); }
+    .fact b { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+
+    .toast-wrap { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 50; display: grid; gap: 8px; pointer-events: none; width: min(420px, calc(100% - 24px)); }
+    .toast { padding: 13px 16px; border-radius: 16px; background: var(--text); color: var(--card); box-shadow: var(--soft-shadow); text-align: center; font-weight: 900; animation: toastIn .18s ease; }
+    @keyframes toastIn { from { transform: translateY(-8px); opacity: 0; } }
+
+    .modal-overlay { display:none; position: fixed; inset: 0; background: rgba(0,0,0,.42); z-index: 40; padding: 18px; place-items: center; }
+    .modal-overlay.active { display:grid; }
+    .modal-card { width: min(680px, 100%); max-height: min(760px, 92vh); overflow: auto; padding: 24px; }
+    .modal-card h2 { font-size: 34px; letter-spacing: -.05em; margin-bottom: 10px; }
+    .modal-card p, .modal-card li { color: var(--muted); line-height: 1.5; }
+    .modal-card ul { margin: 12px 0 0; padding-left: 22px; }
+
+    .tiny-btn { min-height: 38px; padding: 8px 12px; border: 1px solid var(--line); background: var(--card); font-size: 12px; }
+
+    .timer-bar { width: 100%; height: 12px; background: color-mix(in srgb, var(--line) 70%, transparent); border-radius: 999px; overflow: hidden; margin: 12px 0 0; }
+    .timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, var(--primary2), var(--accent)); border-radius: 999px; transform-origin: left; }
+
+    .shake { animation: shake .35s ease; }
+    @keyframes shake { 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
+
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: 1fr; }
+      .panel { position: static; order: 2; }
+      .hero { grid-template-columns: 1fr; min-height: auto; }
+      .mascot-wrap { order: -1; }
+      .mystery-zone { grid-template-columns: 1fr; }
+      .game-card { min-height: auto; }
+      .fact-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 520px) {
+      .app { padding: 12px; }
+      header { align-items: flex-start; }
+      .tagline { display: none; }
+      .logo { width: 46px; height: 46px; font-size: 25px; }
+      .top-actions { gap: 8px; }
+      .icon-btn { width: 44px; min-height: 44px; }
+      .cat-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(4, 1fr); }
+      .stat { padding: 10px 7px; text-align:center; }
+      .stat strong { font-size: 20px; }
+      .stat span { font-size: 10px; }
+      .animal-emoji { width: 120px; height: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toast-wrap" id="toastWrap"></div>
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-card">
+      <h2 id="modalTitle">How to Play</h2>
+      <div id="modalBody"></div>
+      <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px;">
+        <button class="secondary-btn" id="modalClose">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <main class="app">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true">🔎</div>
+        <div>
+          <h1>Animal Detective</h1>
+          <div class="tagline">Crack clues. Learn creatures. Build your wildlife brain.</div>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="helpBtn" title="How to play" aria-label="How to play">?</button>
+        <button class="icon-btn" id="soundBtn" title="Toggle sound" aria-label="Toggle sound">🔊</button>
+        <button class="icon-btn" id="themeBtn" title="Toggle theme" aria-label="Toggle theme">🌙</button>
+      </div>
+    </header>
+
+    <section class="layout">
+      <aside class="panel" aria-label="Game settings and progress">
+        <div class="panel-section">
+          <div class="label">Detective Stats</div>
+          <div class="stats-grid">
+            <div class="stat"><strong id="scoreStat">0</strong><span>Score</span></div>
+            <div class="stat"><strong id="streakStat">0</strong><span>Streak</span></div>
+            <div class="stat"><strong id="bestStat">0</strong><span>Best</span></div>
+            <div class="stat"><strong id="seenStat">0</strong><span>Seen</span></div>
+          </div>
+        </div>
+        <div class="panel-section">
+          <div class="label">Game Mode</div>
+          <div class="mode-grid" id="modeGrid"></div>
+        </div>
+        <div class="panel-section">
+          <div class="label">Animal Worlds</div>
+          <div class="cat-grid" id="catGrid"></div>
+        </div>
+        <div class="panel-section">
+          <div class="label">Progress</div>
+          <div class="chip" style="display:block; margin-bottom:10px;">Rank: <strong id="rankLabel">Rookie Ranger</strong></div>
+          <button class="tiny-btn" id="resetBtn">Reset Progress</button>
+        </div>
+      </aside>
+
+      <section class="game-card">
+        <div class="hero" id="homeView">
+          <div>
+            <h2>The clue-chasing animal game.</h2>
+            <p>Pick a mode, follow the clues, and identify animals from oceans, forests, deserts, farms, backyards, and more. Designed for kids, but sharp enough for adults.</p>
+            <div class="hero-actions">
+              <button class="primary-btn" id="startBtn">Start Detective Mission</button>
+              <button class="secondary-btn" id="learnBtn">View Rules</button>
+            </div>
+          </div>
+          <div class="mascot-wrap"><div class="mascot" aria-hidden="true"><div class="lens"></div></div></div>
+        </div>
+
+        <div class="game-view" id="gameView">
+          <div class="hud">
+            <div class="chips">
+              <div class="chip">Mode: <strong id="modeLabel">Classic</strong></div>
+              <div class="chip">World: <strong id="catLabel">All</strong></div>
+              <div class="chip">Clues: <strong id="clueCountLabel">1/5</strong></div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="tiny-btn" id="skipBtn">Skip</button>
+              <button class="tiny-btn" id="homeBtn">Home</button>
+            </div>
+          </div>
+
+          <div class="timer-bar" id="timerBar" style="display:none;"><div class="timer-fill" id="timerFill"></div></div>
+
+          <div class="mystery-zone">
+            <div class="clue-card">
+              <div class="animal-emoji" id="mysteryEmoji" aria-label="Mystery animal">❔</div>
+              <div class="label">Case File</div>
+              <h2 id="caseTitle" style="font-size:34px; letter-spacing:-.04em; margin-bottom:6px;">Mystery Animal</h2>
+              <p id="casePrompt" style="color:var(--muted); line-height:1.45;">Read the clues, then choose the animal.</p>
+              <div class="clue-list" id="clueList"></div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;">
+                <button class="secondary-btn" id="nextClueBtn">Reveal Another Clue</button>
+                <button class="secondary-btn" id="fiftyBtn">50/50</button>
+              </div>
+            </div>
+            <div class="answers-card" id="answersCard">
+              <div class="label">Suspects</div>
+              <h2 style="font-size:32px; letter-spacing:-.04em;">Who is it?</h2>
+              <div class="answer-grid" id="answerGrid"></div>
+            </div>
+          </div>
+
+          <div class="learn-card" id="learnCard">
+            <div class="learn-head">
+              <div class="learn-emoji" id="learnEmoji">🦊</div>
+              <div>
+                <div class="label" id="resultLabel">Case Closed</div>
+                <h3 id="learnTitle">Red Fox</h3>
+              </div>
+            </div>
+            <p id="learnText"></p>
+            <div class="fact-grid">
+              <div class="fact"><b>Class</b><span id="factClass"></span></div>
+              <div class="fact"><b>Habitat</b><span id="factHabitat"></span></div>
+              <div class="fact"><b>Diet</b><span id="factDiet"></span></div>
+            </div>
+            <p id="funFact" style="font-weight:800; color:var(--text);"></p>
+            <div class="hero-actions" style="margin-top:16px;">
+              <button class="primary-btn" id="nextRoundBtn">Next Case</button>
+              <button class="secondary-btn" id="explainBtn">Why?</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  const MODES = [
+    { id: "classic", name: "Classic", note: "balanced", clues: 5, choices: 4, timer: 0 },
+    { id: "junior", name: "Junior", note: "easier", clues: 6, choices: 3, timer: 0 },
+    { id: "speed", name: "Speed", note: "90 sec", clues: 4, choices: 4, timer: 90 },
+    { id: "expert", name: "Expert", note: "harder", clues: 3, choices: 6, timer: 0 }
+  ];
+
+  const CATEGORIES = ["All", "Backyard", "Farm", "Forest", "Ocean", "Desert", "Arctic", "Jungle", "Grassland", "Wetlands", "Pets"];
+
+  const ANIMALS = [
+    {name:"Red Fox",emoji:"🦊",class:"Mammal",habitat:"Forests, grasslands, cities",diet:"Small animals, fruit, insects",cat:["Forest","Backyard"],clues:["I have a bushy tail that can help me balance.","I am known for being clever and quiet.","I often hunt mice, rabbits, and insects.","I can live in forests, fields, and even neighborhoods.","My fur is often orange-red."],fact:"A fox can use Earth's magnetic field to help aim a jump while hunting.",why:"The clues point to a small, clever mammal with orange-red fur and a bushy tail that adapts well to many habitats."},
+    {name:"Bald Eagle",emoji:"🦅",class:"Bird",habitat:"Lakes, rivers, coasts",diet:"Fish and small animals",cat:["Forest","Wetlands"],clues:["I am a bird of prey with very strong eyesight.","I often live near lakes and rivers.","Fish are one of my favorite meals.","Adults have a white head and dark body.","I am a national symbol of the United States."],fact:"A bald eagle's nest can become huge after years of reuse.",why:"The white head, fish diet, sharp eyesight, and national-symbol clue identify the bald eagle."},
+    {name:"Dolphin",emoji:"🐬",class:"Mammal",habitat:"Oceans and seas",diet:"Fish and squid",cat:["Ocean"],clues:["I live in the ocean but breathe air.","I am very social and often swim in groups.","I use clicks and sounds to find things underwater.","I am not a fish, even though I look like one.","I am famous for leaping out of the water."],fact:"Dolphins use echolocation, which works like natural sonar.",why:"Breathing air, living in the ocean, using clicks, and swimming in groups all fit dolphins."},
+    {name:"Sea Turtle",emoji:"🐢",class:"Reptile",habitat:"Oceans and beaches",diet:"Sea grass, jellyfish, sponges",cat:["Ocean"],clues:["I am a reptile with a hard shell.","I spend most of my life in the ocean.","I return to beaches to lay eggs.","Some kinds eat jellyfish.","I move with flippers instead of feet."],fact:"Some sea turtles can travel thousands of miles across the ocean.",why:"A shelled reptile with flippers that lays eggs on beaches is a sea turtle."},
+    {name:"Penguin",emoji:"🐧",class:"Bird",habitat:"Cold coasts and oceans",diet:"Fish, krill, squid",cat:["Arctic","Ocean"],clues:["I am a bird, but I do not fly.","I am an excellent swimmer.","I have black-and-white coloring like a tuxedo.","Many of my relatives live in very cold places.","I waddle when I walk on land."],fact:"Penguins use their wings like flippers underwater.",why:"The flightless bird, swimming ability, tuxedo colors, and waddling point to a penguin."},
+    {name:"Polar Bear",emoji:"🐻‍❄️",class:"Mammal",habitat:"Arctic sea ice",diet:"Seals and fish",cat:["Arctic"],clues:["I am one of the largest land predators.","I live where sea ice forms.","My fur looks white, helping me blend into snow.","I am a powerful swimmer.","Seals are my main food."],fact:"Polar bear skin is black under its pale fur.",why:"A huge white-looking bear that lives on Arctic ice and hunts seals is a polar bear."},
+    {name:"Elephant",emoji:"🐘",class:"Mammal",habitat:"Savannas, forests, grasslands",diet:"Plants, bark, fruit",cat:["Grassland","Jungle"],clues:["I am the largest land animal alive today.","I use a long trunk to smell, drink, and grab food.","I have large ears and tusks in many cases.","I live in family groups.","I can remember paths to water."],fact:"An elephant's trunk has tens of thousands of muscles.",why:"The large size, trunk, big ears, tusks, and family groups identify the elephant."},
+    {name:"Giraffe",emoji:"🦒",class:"Mammal",habitat:"Savannas and open woodlands",diet:"Leaves",cat:["Grassland"],clues:["I am the tallest land animal.","My long neck helps me reach leaves high in trees.","I have spots all over my body.","I often eat from acacia trees.","I have small horn-like knobs on my head."],fact:"A giraffe's neck has seven main bones, like a human neck, but much longer.",why:"A very tall spotted animal with a long neck that eats high leaves is a giraffe."},
+    {name:"Lion",emoji:"🦁",class:"Mammal",habitat:"Grasslands and savannas",diet:"Meat",cat:["Grassland"],clues:["I am a big cat that lives in groups called prides.","Males often have a thick mane.","I hunt large animals on the savanna.","My roar can be heard from far away.","People often call me the king of beasts."],fact:"Lions are the most social of the big cats.",why:"A mane, pride, roar, and savanna hunting all point to a lion."},
+    {name:"Tiger",emoji:"🐅",class:"Mammal",habitat:"Forests, grasslands, wetlands",diet:"Meat",cat:["Jungle","Forest"],clues:["I am the largest kind of big cat.","My coat has orange fur with black stripes.","I usually hunt alone.","I can swim well.","My stripes help me hide in tall grass and forest shadows."],fact:"Every tiger has a unique stripe pattern.",why:"The orange-and-black striped big cat that hunts alone is a tiger."},
+    {name:"Kangaroo",emoji:"🦘",class:"Mammal",habitat:"Grasslands and scrublands",diet:"Grasses and plants",cat:["Grassland"],clues:["I move by hopping on powerful back legs.","I have a strong tail for balance.","Mothers carry babies in a pouch.","I am closely associated with Australia.","My baby is called a joey."],fact:"Kangaroos cannot easily walk backward.",why:"Hopping, a pouch, a joey, and Australia identify the kangaroo."},
+    {name:"Koala",emoji:"🐨",class:"Mammal",habitat:"Eucalyptus forests",diet:"Eucalyptus leaves",cat:["Forest"],clues:["I sleep for much of the day.","I eat mostly eucalyptus leaves.","I have round fluffy ears and a large dark nose.","I live in trees.","I am from Australia."],fact:"Koalas have fingerprints that can look surprisingly human-like.",why:"A sleepy tree-dwelling Australian mammal that eats eucalyptus is a koala."},
+    {name:"Owl",emoji:"🦉",class:"Bird",habitat:"Forests, deserts, barns",diet:"Small mammals, insects, birds",cat:["Forest","Backyard","Farm"],clues:["I am often active at night.","I can turn my head very far.","My soft feathers help me fly quietly.","I have large forward-facing eyes.","I often hoot."],fact:"Owls cannot move their eyes much, so they turn their heads instead.",why:"Night activity, silent flight, big eyes, hooting, and head turning identify an owl."},
+    {name:"Raccoon",emoji:"🦝",class:"Mammal",habitat:"Forests, wetlands, cities",diet:"Fruit, insects, eggs, scraps",cat:["Backyard","Forest","Wetlands"],clues:["I often come out at night.","I have a black mask across my face.","My front paws are very useful for grabbing things.","I may search trash cans for food.","My ringed tail is easy to recognize."],fact:"Raccoons have very sensitive front paws that help them explore objects.",why:"The mask, ringed tail, night habits, and clever paws point to a raccoon."},
+    {name:"Squirrel",emoji:"🐿️",class:"Mammal",habitat:"Trees, parks, neighborhoods",diet:"Nuts, seeds, fruit",cat:["Backyard","Forest"],clues:["I climb trees quickly.","I often bury nuts for later.","I have a bushy tail.","I am common in parks and backyards.","I may chatter loudly when alarmed."],fact:"Squirrels sometimes forget buried nuts, helping new trees grow.",why:"Tree climbing, nut burying, and a bushy tail identify a squirrel."},
+    {name:"Rabbit",emoji:"🐇",class:"Mammal",habitat:"Meadows, woods, yards",diet:"Grass, clover, plants",cat:["Backyard","Farm","Grassland"],clues:["I have long ears.","I hop using strong back legs.","I eat grass and leafy plants.","I can be a wild animal or a pet.","My nose often twitches."],fact:"A rabbit's eyes are positioned to help it spot danger from many directions.",why:"Long ears, hopping, plant eating, and twitching nose identify a rabbit."},
+    {name:"Horse",emoji:"🐴",class:"Mammal",habitat:"Farms, grasslands",diet:"Grass and hay",cat:["Farm","Grassland"],clues:["I have hooves and a mane.","People have ridden me for transportation and sport.","I eat grass and hay.","I can gallop very fast.","I often live in stables or pastures."],fact:"Horses can sleep standing up for short periods.",why:"Hooves, mane, riding, galloping, and pasture life identify the horse."},
+    {name:"Cow",emoji:"🐄",class:"Mammal",habitat:"Farms and pastures",diet:"Grass and hay",cat:["Farm"],clues:["I am a farm animal that eats grass.","People often raise me for milk or meat.","I chew cud.","I often have spots or patches.","I say moo."],fact:"Cows have a special stomach system that helps digest tough grass.",why:"Milk, cud chewing, mooing, and farm pasture clues identify a cow."},
+    {name:"Chicken",emoji:"🐔",class:"Bird",habitat:"Farms and backyards",diet:"Seeds, insects, grains",cat:["Farm","Backyard"],clues:["I am a bird often found on farms.","Females lay eggs people eat.","I scratch the ground looking for food.","I have a comb on my head.","Roosters crow."],fact:"Chickens can remember many different faces, including other chickens.",why:"Egg laying, scratching, comb, and rooster crowing identify a chicken."},
+    {name:"Pig",emoji:"🐖",class:"Mammal",habitat:"Farms, forests for wild relatives",diet:"Plants, roots, insects",cat:["Farm"],clues:["I have a snout that helps me root around.","I am very intelligent.","I may roll in mud to cool off.","I am a common farm animal.","I often say oink."],fact:"Pigs are smart and can learn tasks quickly.",why:"Snout rooting, mud cooling, farm life, and oinking identify a pig."},
+    {name:"Frog",emoji:"🐸",class:"Amphibian",habitat:"Ponds, wetlands, forests",diet:"Insects and small animals",cat:["Wetlands","Backyard"],clues:["I begin life as a tadpole.","I can live in water and on land.","I catch insects with a sticky tongue.","I often make croaking sounds.","I have long back legs for jumping."],fact:"Some frogs can absorb water through their skin.",why:"Tadpoles, croaking, jumping legs, and amphibian life point to a frog."},
+    {name:"Alligator",emoji:"🐊",class:"Reptile",habitat:"Swamps, rivers, wetlands",diet:"Fish, birds, mammals",cat:["Wetlands"],clues:["I am a large reptile with a powerful tail.","I live in freshwater wetlands and swamps.","My eyes and nostrils sit high on my head.","I have a broad snout.","I am common in the southeastern United States."],fact:"Alligators help create small water holes used by other animals during dry periods.",why:"Freshwater swamps, broad snout, and powerful reptile body identify an alligator."},
+    {name:"Crocodile",emoji:"🐊",class:"Reptile",habitat:"Rivers, wetlands, coasts",diet:"Fish, birds, mammals",cat:["Wetlands","Jungle"],clues:["I am a large reptile with a long powerful jaw.","Some of my teeth show when my mouth is closed.","I may live in salty or brackish water.","I am an ambush hunter.","I look similar to an alligator but often have a narrower snout."],fact:"Crocodiles have existed in similar forms for millions of years.",why:"A large ambush reptile with a narrower snout and visible teeth is a crocodile."},
+    {name:"Camel",emoji:"🐪",class:"Mammal",habitat:"Deserts and dry regions",diet:"Dry plants and shrubs",cat:["Desert"],clues:["I am built for dry places.","My hump stores fat, not water.","I have long eyelashes that help in blowing sand.","My wide feet help me walk on sand.","People call me a ship of the desert."],fact:"Camels can drink a large amount of water when they finally find it.",why:"Humps, sand walking, eyelashes, and desert travel point to a camel."},
+    {name:"Fennec Fox",emoji:"🦊",class:"Mammal",habitat:"Deserts",diet:"Insects, small animals, plants",cat:["Desert"],clues:["I am a tiny desert fox.","My huge ears help release heat.","I am mostly active at night.","I can hear prey moving under sand.","I live in burrows."],fact:"The fennec fox is the smallest fox species.",why:"A tiny desert fox with huge ears and night habits is the fennec fox."},
+    {name:"Meerkat",emoji:"🦦",class:"Mammal",habitat:"Deserts and dry grasslands",diet:"Insects, lizards, small animals",cat:["Desert","Grassland"],clues:["I live in groups called mobs.","One of us often stands guard.","I stand upright to watch for danger.","I eat insects and small animals.","I live in burrow systems."],fact:"Meerkats use different warning calls for different dangers.",why:"Standing guard, living in mobs, and burrow life identify the meerkat."},
+    {name:"Octopus",emoji:"🐙",class:"Mollusk",habitat:"Oceans",diet:"Crabs, fish, shellfish",cat:["Ocean"],clues:["I have eight arms.","I am very intelligent for an invertebrate.","I can squeeze through tiny spaces.","I can change color and texture.","I may spray ink to escape."],fact:"An octopus has three hearts.",why:"Eight arms, color change, ink, and clever behavior identify an octopus."},
+    {name:"Shark",emoji:"🦈",class:"Fish",habitat:"Oceans",diet:"Fish, seals, other sea animals",cat:["Ocean"],clues:["I am a fish with cartilage instead of bones.","I have rows of sharp teeth.","I can sense tiny movements in the water.","Some kinds are top ocean predators.","My fin often breaks the surface in movies."],fact:"Sharks constantly replace teeth throughout their lives.",why:"Cartilage, sharp teeth, and top ocean predator clues identify the shark."},
+    {name:"Clownfish",emoji:"🐠",class:"Fish",habitat:"Coral reefs",diet:"Tiny animals and algae",cat:["Ocean"],clues:["I am a small orange fish with white stripes.","I often live among sea anemones.","A famous movie made my kind very popular.","The anemone helps protect me.","I live on coral reefs."],fact:"Clownfish and sea anemones help each other survive.",why:"Orange stripes, sea anemones, reefs, and the movie clue point to clownfish."},
+    {name:"Butterfly",emoji:"🦋",class:"Insect",habitat:"Gardens, meadows, forests",diet:"Nectar",cat:["Backyard","Forest"],clues:["I start life as a caterpillar.","I go through metamorphosis.","I have colorful wings.","I drink nectar from flowers.","I help pollinate plants."],fact:"Butterflies taste with their feet.",why:"Caterpillar life, metamorphosis, colorful wings, and nectar identify a butterfly."},
+    {name:"Honeybee",emoji:"🐝",class:"Insect",habitat:"Gardens, meadows, hives",diet:"Nectar and pollen",cat:["Backyard","Farm"],clues:["I am an insect that visits flowers.","I live in a hive with many others.","I make honey.","I help pollinate crops and wildflowers.","I can do a waggle dance to share directions."],fact:"Honeybees communicate food locations with a special dance.",why:"Hives, honey, flowers, and the waggle dance identify a honeybee."},
+    {name:"Dog",emoji:"🐕",class:"Mammal",habitat:"Homes with people",diet:"Dog food, meat-based foods",cat:["Pets"],clues:["I am often called a person's best friend.","I have an excellent sense of smell.","I may bark, wag, fetch, and guard.","I come in many breeds and sizes.","People keep me as a pet and helper."],fact:"A dog's sense of smell is far stronger than a human's.",why:"Barking, breeds, strong smell, and pet/helper clues identify a dog."},
+    {name:"Cat",emoji:"🐈",class:"Mammal",habitat:"Homes, farms, neighborhoods",diet:"Meat-based foods",cat:["Pets","Farm","Backyard"],clues:["I am a common pet that often purrs.","I have whiskers and sharp retractable claws.","I may chase mice or toys.","I can jump very well.","I often groom myself with my tongue."],fact:"Cats use whiskers to sense nearby objects and tight spaces.",why:"Purring, whiskers, retractable claws, and grooming identify a cat."},
+    {name:"Goldfish",emoji:"🐟",class:"Fish",habitat:"Aquariums and ponds",diet:"Fish flakes, plants, tiny animals",cat:["Pets"],clues:["I am a small fish often kept as a pet.","I usually live in an aquarium or pond.","I can be orange, gold, white, or spotted.","I breathe with gills.","I do not bark, purr, or fly."],fact:"Goldfish can learn routines and recognize feeding times.",why:"A colorful pet fish in aquariums or ponds is a goldfish."},
+    {name:"Parrot",emoji:"🦜",class:"Bird",habitat:"Tropical forests, homes",diet:"Seeds, fruit, nuts",cat:["Jungle","Pets"],clues:["I am a colorful bird.","Some of my kind can copy human sounds.","I have a strong curved beak.","I may eat fruit, nuts, and seeds.","I am found in tropical places and sometimes kept as a pet."],fact:"Some parrots are excellent problem solvers.",why:"Colorful feathers, curved beak, mimicry, and tropical/pet clues point to a parrot."},
+    {name:"Sloth",emoji:"🦥",class:"Mammal",habitat:"Tropical rainforests",diet:"Leaves",cat:["Jungle"],clues:["I move very slowly.","I spend much of my life hanging in trees.","I eat leaves.","Algae can grow in my fur, helping me blend in.","I have long curved claws."],fact:"Sloths can be surprisingly good swimmers.",why:"Slow movement, tree hanging, leaf diet, and curved claws identify the sloth."},
+    {name:"Gorilla",emoji:"🦍",class:"Mammal",habitat:"African forests",diet:"Leaves, stems, fruit",cat:["Jungle","Forest"],clues:["I am the largest primate.","I live in family groups led by a silverback male.","I mostly eat plants.","I have strong arms and can knuckle-walk.","I am closely related to humans."],fact:"Gorillas can use tools in simple ways.",why:"Largest primate, silverback family groups, and knuckle-walking identify the gorilla."},
+    {name:"Panda",emoji:"🐼",class:"Mammal",habitat:"Bamboo forests",diet:"Mostly bamboo",cat:["Forest"],clues:["I am a black-and-white bear.","I eat mostly bamboo.","I live in mountain forests in China.","I have a special wrist bone that helps me hold bamboo.","I am famous for a round face and dark eye patches."],fact:"Pandas spend many hours each day eating bamboo.",why:"Black-and-white bear, bamboo diet, China, and eye patches identify the panda."},
+    {name:"Wolf",emoji:"🐺",class:"Mammal",habitat:"Forests, tundra, grasslands",diet:"Deer, elk, smaller animals",cat:["Forest","Arctic","Grassland"],clues:["I am a wild relative of the dog.","I often live and hunt in packs.","I howl to communicate.","I may hunt deer, elk, or smaller animals.","My pack works together."],fact:"Wolf howls can help pack members find one another.",why:"Wild dog relative, packs, howling, and cooperative hunting identify the wolf."},
+    {name:"Moose",emoji:"🫎",class:"Mammal",habitat:"Northern forests and wetlands",diet:"Leaves, twigs, aquatic plants",cat:["Forest","Wetlands","Arctic"],clues:["I am a very large member of the deer family.","Males grow broad antlers.","I often live near cold forests and wetlands.","I can swim well.","I have a long face and tall legs."],fact:"Moose can dive underwater to eat aquatic plants.",why:"Huge deer relative, broad antlers, cold wetlands, and swimming identify a moose."},
+    {name:"Flamingo",emoji:"🦩",class:"Bird",habitat:"Shallow lakes and wetlands",diet:"Algae, tiny shrimp, plankton",cat:["Wetlands"],clues:["I am a tall bird often seen standing on one leg.","My feathers are pink because of my food.","I use a special beak to filter tiny food from water.","I live in groups near shallow water.","My long legs help me wade."],fact:"A flamingo's pink color comes from pigments in its diet.",why:"Pink feathers, one-leg stance, shallow water, and filter feeding identify a flamingo."},
+    {name:"Peacock",emoji:"🦚",class:"Bird",habitat:"Forests, farms, parks",diet:"Seeds, insects, plants",cat:["Farm","Forest"],clues:["The male has a huge colorful tail display.","I am famous for eye-like patterns on feathers.","I can make loud calls.","I eat seeds, insects, and plants.","People often admire my bright blue and green colors."],fact:"The bird often called a peacock is technically the male peafowl.",why:"The colorful fan tail with eye-like spots identifies the peacock."},
+    {name:"Zebra",emoji:"🦓",class:"Mammal",habitat:"African grasslands",diet:"Grass",cat:["Grassland"],clues:["I look like a horse with stripes.","I eat grass.","I live in herds.","My black-and-white pattern is unique to me.","I am native to Africa."],fact:"No two zebras have exactly the same stripe pattern.",why:"Horse-like body, African grasslands, herds, and stripes identify the zebra."},
+    {name:"Hedgehog",emoji:"🦔",class:"Mammal",habitat:"Gardens, hedges, grasslands",diet:"Insects, worms, small animals",cat:["Backyard","Forest"],clues:["I am small and covered with spines.","I may curl into a ball when frightened.","I often search for insects at night.","I have a pointed snout.","I can live around gardens and hedges."],fact:"A hedgehog's spines are modified hairs made of keratin.",why:"Small size, spines, curling into a ball, and night insect hunting identify a hedgehog."},
+    {name:"Bat",emoji:"🦇",class:"Mammal",habitat:"Caves, forests, cities",diet:"Insects, fruit, nectar, or blood depending on species",cat:["Backyard","Forest","Jungle"],clues:["I am the only mammal that truly flies.","Many of my kind are active at night.","Some use echolocation to find insects.","I often rest upside down.","My wings are made of skin stretched over long fingers."],fact:"Bats help control insects and pollinate some plants.",why:"A flying mammal with echolocation and upside-down roosting is a bat."},
+    {name:"Beaver",emoji:"🦫",class:"Mammal",habitat:"Rivers, ponds, wetlands",diet:"Bark, leaves, aquatic plants",cat:["Wetlands","Forest"],clues:["I have large front teeth that keep growing.","I build dams and lodges.","My flat tail helps me swim and signal danger.","I live near water.","I cut down small trees."],fact:"Beaver dams can create wetlands that help many other species.",why:"Dams, flat tail, water life, and tree cutting identify the beaver."},
+    {name:"Otter",emoji:"🦦",class:"Mammal",habitat:"Rivers, lakes, coasts",diet:"Fish, crabs, shellfish",cat:["Wetlands","Ocean"],clues:["I am a playful mammal that swims well.","I have a long body and webbed feet.","I eat fish and other water animals.","Some of my relatives use rocks as tools.","I may slide on mud or snow."],fact:"Sea otters often hold hands while resting so they do not drift apart.",why:"A playful swimming mammal with webbed feet and tool-using relatives is an otter."},
+    {name:"Snake",emoji:"🐍",class:"Reptile",habitat:"Forests, deserts, grasslands, wetlands",diet:"Rodents, eggs, insects, other animals",cat:["Desert","Forest","Wetlands","Backyard"],clues:["I have no legs.","I smell with my tongue.","I shed my skin as I grow.","Some of my kind are venomous, but many are not.","I move by slithering."],fact:"A snake's forked tongue helps it sense smell direction.",why:"No legs, tongue smelling, shedding, and slithering identify the snake."},
+    {name:"Lizard",emoji:"🦎",class:"Reptile",habitat:"Deserts, forests, backyards",diet:"Insects, plants, small animals",cat:["Desert","Backyard","Forest"],clues:["I am a reptile often seen basking in the sun.","Many of my kind eat insects.","Some can drop their tail to escape.","I have scaly skin.","I run quickly on small legs."],fact:"Some lizards can regrow part of a lost tail.",why:"Sun basking, scales, insect eating, tail dropping, and small legs point to a lizard."},
+    {name:"Deer",emoji:"🦌",class:"Mammal",habitat:"Forests, fields, neighborhoods",diet:"Leaves, grass, fruit",cat:["Forest","Backyard","Grassland"],clues:["I am a graceful plant-eating mammal.","Males of many kinds grow antlers.","I am often seen at dawn or dusk.","I may leap across fields and roads.","My young are called fawns."],fact:"Fawns often have spots that help them hide in dappled light.",why:"Antlers, fawns, plant diet, and dawn/dusk activity identify the deer."},
+    {name:"Black Bear",emoji:"🐻",class:"Mammal",habitat:"Forests and mountains",diet:"Berries, nuts, insects, fish",cat:["Forest"],clues:["I am a large forest mammal.","I eat many kinds of food, including berries and insects.","I may climb trees well.","I hibernate or rest deeply in colder months.","Despite my name, I can be black, brown, or cinnamon-colored."],fact:"Black bears have an excellent sense of smell.",why:"A large forest omnivore that climbs and rests through winter is a black bear."},
+    {name:"Toucan",emoji:"🦜",class:"Bird",habitat:"Tropical forests",diet:"Fruit, insects, small animals",cat:["Jungle"],clues:["I am a tropical bird with a very large colorful beak.","I eat lots of fruit.","I live in rainforest trees.","My beak looks heavy but is surprisingly light.","I am often shown with bright colors."],fact:"A toucan's beak can help release extra body heat.",why:"The huge colorful lightweight beak and rainforest fruit diet identify a toucan."},
+    {name:"Lemur",emoji:"🐒",class:"Mammal",habitat:"Forests of Madagascar",diet:"Fruit, leaves, insects",cat:["Jungle","Forest"],clues:["I am a primate found naturally on Madagascar.","Some kinds have ringed tails.","I leap and climb through trees.","I may eat fruit, leaves, and insects.","My eyes can look very large."],fact:"Lemurs are found in the wild only on Madagascar and nearby islands.",why:"A tree-climbing primate from Madagascar, often with a ringed tail, is a lemur."}
+  ];
+
+  const state = {
+    mode: "classic", category: "All", score: 0, streak: 0, best: 0, seen: new Set(),
+    current: null, choices: [], revealed: 1, locked: false, timerId: null, timeLeft: 0,
+    sound: true, lastIds: []
+  };
+
+  const $ = id => document.getElementById(id);
+  const els = {
+    modeGrid: $("modeGrid"), catGrid: $("catGrid"), homeView: $("homeView"), gameView: $("gameView"),
+    startBtn: $("startBtn"), learnBtn: $("learnBtn"), helpBtn: $("helpBtn"), themeBtn: $("themeBtn"), soundBtn: $("soundBtn"),
+    scoreStat: $("scoreStat"), streakStat: $("streakStat"), bestStat: $("bestStat"), seenStat: $("seenStat"), rankLabel: $("rankLabel"),
+    modeLabel: $("modeLabel"), catLabel: $("catLabel"), clueCountLabel: $("clueCountLabel"), clueList: $("clueList"),
+    answerGrid: $("answerGrid"), mysteryEmoji: $("mysteryEmoji"), learnCard: $("learnCard"), learnEmoji: $("learnEmoji"), learnTitle: $("learnTitle"),
+    learnText: $("learnText"), factClass: $("factClass"), factHabitat: $("factHabitat"), factDiet: $("factDiet"), funFact: $("funFact"), resultLabel: $("resultLabel"),
+    nextClueBtn: $("nextClueBtn"), fiftyBtn: $("fiftyBtn"), nextRoundBtn: $("nextRoundBtn"), skipBtn: $("skipBtn"), homeBtn: $("homeBtn"),
+    modalOverlay: $("modalOverlay"), modalBody: $("modalBody"), modalTitle: $("modalTitle"), modalClose: $("modalClose"), resetBtn: $("resetBtn"), explainBtn: $("explainBtn"),
+    timerBar: $("timerBar"), timerFill: $("timerFill")
+  };
+
+  function load() {
+    try {
+      const saved = JSON.parse(localStorage.getItem("animalDetectiveProgress") || "{}");
+      state.score = Number(saved.score) || 0;
+      state.streak = Number(saved.streak) || 0;
+      state.best = Number(saved.best) || 0;
+      state.seen = new Set(Array.isArray(saved.seen) ? saved.seen : []);
+      state.mode = saved.mode || "classic";
+      state.category = saved.category || "All";
+      state.sound = saved.sound !== false;
+      const theme = saved.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.dataset.theme = theme;
+    } catch (_) {}
+  }
+
+  function save() {
+    localStorage.setItem("animalDetectiveProgress", JSON.stringify({
+      score: state.score, streak: state.streak, best: state.best, seen: [...state.seen], mode: state.mode,
+      category: state.category, sound: state.sound, theme: document.documentElement.dataset.theme
+    }));
+  }
+
+  function renderSettings() {
+    els.modeGrid.innerHTML = MODES.map(m => `<button class="pill-btn ${state.mode===m.id?'active':''}" data-mode="${m.id}"><span>${m.name}</span><small>${m.note}</small></button>`).join("");
+    els.catGrid.innerHTML = CATEGORIES.map(c => `<button class="pill-btn ${state.category===c?'active':''}" data-cat="${c}"><span>${c}</span><small>${countCategory(c)}</small></button>`).join("");
+    els.modeLabel.textContent = MODES.find(m => m.id === state.mode).name;
+    els.catLabel.textContent = state.category;
+    els.soundBtn.textContent = state.sound ? "🔊" : "🔇";
+    els.themeBtn.textContent = document.documentElement.dataset.theme === "dark" ? "☀️" : "🌙";
+  }
+
+  function countCategory(cat) { return cat === "All" ? ANIMALS.length : ANIMALS.filter(a => a.cat.includes(cat)).length; }
+
+  function renderStats() {
+    state.best = Math.max(state.best, state.streak);
+    els.scoreStat.textContent = state.score;
+    els.streakStat.textContent = state.streak;
+    els.bestStat.textContent = state.best;
+    els.seenStat.textContent = state.seen.size;
+    els.rankLabel.textContent = getRank();
+    save();
+  }
+
+  function getRank() {
+    const s = state.score;
+    if (s >= 2000) return "Legendary Zoologist";
+    if (s >= 1200) return "Wildlife Mastermind";
+    if (s >= 700) return "Senior Safari Sleuth";
+    if (s >= 350) return "Creature Expert";
+    if (s >= 150) return "Trail Tracker";
+    if (s >= 50) return "Junior Detective";
+    return "Rookie Ranger";
+  }
+
+  function startGame() {
+    els.homeView.style.display = "none";
+    els.gameView.classList.add("active");
+    newRound();
+  }
+
+  function filteredAnimals() {
+    const list = state.category === "All" ? ANIMALS : ANIMALS.filter(a => a.cat.includes(state.category));
+    return list.length >= 6 ? list : ANIMALS;
+  }
+
+  function newRound() {
+    clearTimer();
+    state.locked = false;
+    const mode = MODES.find(m => m.id === state.mode);
+    const pool = filteredAnimals();
+    let options = pool.filter(a => !state.lastIds.includes(a.name));
+    if (options.length < 5) options = pool;
+    state.current = sample(options, 1)[0];
+    state.lastIds = [state.current.name, ...state.lastIds].slice(0, 8);
+    state.revealed = 1;
+    const distractors = sample(ANIMALS.filter(a => a.name !== state.current.name && a.class === state.current.class), Math.max(1, mode.choices - 2))
+      .concat(sample(ANIMALS.filter(a => a.name !== state.current.name && a.class !== state.current.class), mode.choices));
+    state.choices = shuffle([state.current, ...uniqueByName(distractors)].slice(0, mode.choices));
+    if (!state.choices.find(a => a.name === state.current.name)) state.choices[0] = state.current;
+    state.choices = shuffle(state.choices);
+
+    els.learnCard.classList.remove("active");
+    els.mysteryEmoji.textContent = "❔";
+    els.mysteryEmoji.classList.remove("revealed");
+    els.nextClueBtn.disabled = false;
+    els.fiftyBtn.disabled = false;
+    els.timerBar.style.display = mode.timer ? "block" : "none";
+    renderCase();
+    if (mode.timer) startTimer(mode.timer);
+  }
+
+  function uniqueByName(arr) {
+    const map = new Map(); arr.forEach(a => map.set(a.name, a)); return [...map.values()];
+  }
+
+  function renderCase() {
+    const mode = MODES.find(m => m.id === state.mode);
+    const maxClues = Math.min(mode.clues, state.current.clues.length);
+    els.clueCountLabel.textContent = `${state.revealed}/${maxClues}`;
+    const clues = state.current.clues.slice(0, maxClues);
+    els.clueList.innerHTML = clues.map((c, i) => i < state.revealed ? `<div class="clue">${i+1}. ${escapeHtml(c)}</div>` : `<div class="clue locked">${i+1}. Clue locked</div>`).join("");
+    els.answerGrid.innerHTML = state.choices.map(a => `<button class="choice-btn" data-answer="${escapeHtml(a.name)}"><span><span class="name">${escapeHtml(a.name)}</span><br><span class="type">${escapeHtml(a.class)}</span></span><span>›</span></button>`).join("");
+    els.nextClueBtn.textContent = state.revealed >= maxClues ? "No More Clues" : "Reveal Another Clue";
+    els.nextClueBtn.disabled = state.revealed >= maxClues;
+  }
+
+  function revealClue() {
+    if (state.locked) return;
+    const mode = MODES.find(m => m.id === state.mode);
+    const maxClues = Math.min(mode.clues, state.current.clues.length);
+    if (state.revealed < maxClues) {
+      state.revealed++;
+      blip(470, .04);
+      renderCase();
+    }
+  }
+
+  function answer(name) {
+    if (state.locked) return;
+    state.locked = true;
+    clearTimer(false);
+    const correct = name === state.current.name;
+    [...els.answerGrid.querySelectorAll("button")].forEach(btn => {
+      btn.disabled = true;
+      const val = btn.dataset.answer;
+      if (val === state.current.name) btn.classList.add("correct");
+      else if (val === name) btn.classList.add("wrong");
+    });
+    if (correct) {
+      const modeBonus = {junior: 20, classic: 35, speed: 45, expert: 60}[state.mode] || 30;
+      const clueBonus = Math.max(0, 24 - (state.revealed - 1) * 6);
+      const streakBonus = Math.min(50, state.streak * 5);
+      const gained = modeBonus + clueBonus + streakBonus;
+      state.score += gained;
+      state.streak++;
+      toast(`Correct! +${gained} points`);
+      blip(740, .075); setTimeout(() => blip(980, .06), 90);
+    } else {
+      state.streak = 0;
+      toast(`Not this time. It was ${state.current.name}.`);
+      buzz();
+    }
+    state.seen.add(state.current.name);
+    renderStats();
+    revealLearning(correct);
+  }
+
+  function revealLearning(correct) {
+    const a = state.current;
+    els.mysteryEmoji.textContent = a.emoji;
+    els.mysteryEmoji.classList.add("revealed");
+    els.learnEmoji.textContent = a.emoji;
+    els.learnTitle.textContent = a.name;
+    els.resultLabel.textContent = correct ? "Case Closed" : "Solved Together";
+    els.learnText.textContent = `${a.name}s are ${article(a.class)} ${a.class.toLowerCase()} found in ${a.habitat.toLowerCase()}. They usually eat ${a.diet.toLowerCase()}.`;
+    els.factClass.textContent = a.class;
+    els.factHabitat.textContent = a.habitat;
+    els.factDiet.textContent = a.diet;
+    els.funFact.textContent = `Detective Fact: ${a.fact}`;
+    els.learnCard.classList.add("active");
+    els.learnCard.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function fifty() {
+    if (state.locked) return;
+    const wrong = [...els.answerGrid.querySelectorAll("button")].filter(b => b.dataset.answer !== state.current.name && !b.disabled);
+    sample(wrong, Math.ceil(wrong.length / 2)).forEach(btn => { btn.disabled = true; btn.style.opacity = .38; });
+    els.fiftyBtn.disabled = true;
+    state.score = Math.max(0, state.score - 5);
+    renderStats();
+    toast("Two suspects cleared. -5 points");
+  }
+
+  function skip() {
+    if (!state.current) return;
+    state.streak = 0;
+    state.seen.add(state.current.name);
+    renderStats();
+    state.locked = true;
+    clearTimer(false);
+    revealLearning(false);
+    [...els.answerGrid.querySelectorAll("button")].forEach(btn => { btn.disabled = true; if (btn.dataset.answer === state.current.name) btn.classList.add("correct"); });
+  }
+
+  function startTimer(seconds) {
+    state.timeLeft = seconds;
+    updateTimerUI(seconds);
+    state.timerId = setInterval(() => {
+      state.timeLeft--;
+      updateTimerUI(seconds);
+      if (state.timeLeft <= 0) {
+        toast("Time is up!");
+        skip();
+      }
+    }, 1000);
+  }
+
+  function updateTimerUI(total) {
+    els.timerFill.style.transform = `scaleX(${Math.max(0, state.timeLeft / total)})`;
+  }
+
+  function clearTimer(hide=true) {
+    if (state.timerId) clearInterval(state.timerId);
+    state.timerId = null;
+    if (hide) els.timerBar.style.display = "none";
+  }
+
+  function showHelp() {
+    els.modalTitle.textContent = "How to Play";
+    els.modalBody.innerHTML = `<p><strong>Animal Detective</strong> gives you clues about a mystery animal. Choose the correct suspect to close the case.</p>
+      <ul>
+        <li><strong>Classic:</strong> four choices and balanced clues.</li>
+        <li><strong>Junior:</strong> fewer choices and more clues.</li>
+        <li><strong>Speed:</strong> a timed challenge.</li>
+        <li><strong>Expert:</strong> more choices and fewer clues.</li>
+      </ul>
+      <p style="margin-top:12px;">Use <strong>Reveal Another Clue</strong> when stuck. Use <strong>50/50</strong> to remove wrong answers, but it costs 5 points. After every case, the game explains the animal so learning stays built in.</p>`;
+    els.modalOverlay.classList.add("active");
+  }
+
+  function showWhy() {
+    els.modalTitle.textContent = `Why ${state.current.name}?`;
+    els.modalBody.innerHTML = `<p>${escapeHtml(state.current.why)}</p><p style="margin-top:12px;"><strong>Best clue:</strong> ${escapeHtml(state.current.clues[state.current.clues.length - 1])}</p>`;
+    els.modalOverlay.classList.add("active");
+  }
+
+  function closeModal() { els.modalOverlay.classList.remove("active"); }
+
+  function toast(msg) {
+    const div = document.createElement("div");
+    div.className = "toast";
+    div.textContent = msg;
+    $("toastWrap").appendChild(div);
+    setTimeout(() => { div.style.opacity = "0"; div.style.transform = "translateY(-6px)"; }, 1800);
+    setTimeout(() => div.remove(), 2300);
+  }
+
+  function sample(arr, n) {
+    return shuffle([...arr]).slice(0, Math.max(0, n));
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>'"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));
+  }
+
+  function article(word) { return /^[aeiou]/i.test(word) ? "an" : "a"; }
+
+  function blip(freq=520, dur=.05) {
+    if (!state.sound) return;
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.frequency.value = freq; osc.type = "sine";
+      gain.gain.value = .035;
+      osc.connect(gain); gain.connect(ctx.destination); osc.start();
+      gain.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + dur);
+      osc.stop(ctx.currentTime + dur + .02);
+    } catch (_) {}
+  }
+
+  function buzz() { blip(180, .09); setTimeout(() => blip(140, .07), 90); }
+
+  function bind() {
+    els.startBtn.addEventListener("click", startGame);
+    els.learnBtn.addEventListener("click", showHelp);
+    els.helpBtn.addEventListener("click", showHelp);
+    els.modalClose.addEventListener("click", closeModal);
+    els.modalOverlay.addEventListener("click", e => { if (e.target === els.modalOverlay) closeModal(); });
+    els.nextClueBtn.addEventListener("click", revealClue);
+    els.fiftyBtn.addEventListener("click", fifty);
+    els.nextRoundBtn.addEventListener("click", newRound);
+    els.skipBtn.addEventListener("click", skip);
+    els.explainBtn.addEventListener("click", showWhy);
+    els.homeBtn.addEventListener("click", () => { clearTimer(); els.gameView.classList.remove("active"); els.homeView.style.display = "grid"; });
+    els.answerGrid.addEventListener("click", e => { const btn = e.target.closest("button[data-answer]"); if (btn && !btn.disabled) answer(btn.dataset.answer); });
+    els.modeGrid.addEventListener("click", e => { const b = e.target.closest("button[data-mode]"); if (!b) return; state.mode = b.dataset.mode; renderSettings(); save(); if (els.gameView.classList.contains("active")) newRound(); });
+    els.catGrid.addEventListener("click", e => { const b = e.target.closest("button[data-cat]"); if (!b) return; state.category = b.dataset.cat; renderSettings(); save(); if (els.gameView.classList.contains("active")) newRound(); });
+    els.themeBtn.addEventListener("click", () => { document.documentElement.dataset.theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark"; renderSettings(); save(); });
+    els.soundBtn.addEventListener("click", () => { state.sound = !state.sound; renderSettings(); save(); if (state.sound) blip(); });
+    els.resetBtn.addEventListener("click", () => {
+      if (!confirm("Reset all Animal Detective progress?")) return;
+      state.score = 0; state.streak = 0; state.best = 0; state.seen = new Set(); renderStats(); toast("Progress reset.");
+    });
+    document.addEventListener("keydown", e => {
+      if (e.key === "Escape") closeModal();
+      if (!els.gameView.classList.contains("active") || state.locked) return;
+      const n = Number(e.key);
+      if (n >= 1 && n <= state.choices.length) {
+        const btn = els.answerGrid.querySelectorAll("button[data-answer]")[n-1];
+        if (btn && !btn.disabled) answer(btn.dataset.answer);
+      }
+      if (e.key.toLowerCase() === "h") revealClue();
+    });
+  }
+
+  load(); bind(); renderSettings(); renderStats();
+})();
+</script>
+</body>
+</html>
